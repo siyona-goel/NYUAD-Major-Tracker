@@ -107,28 +107,9 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
-
-            {/* Recent Activity Section */}
-            <div className="mt-8 bg-gray-800/50 backdrop-blur-xl rounded-xl p-6 border border-gray-700/50 shadow-lg">
-              <h2 className="text-xl font-semibold text-white mb-4">Recent Activity</h2>
-              <div className="space-y-4">
-                {[1, 2, 3].map((item) => (
-                  <div key={item} className="flex items-center space-x-4 p-3 rounded-lg bg-gray-700/30">
-                    <div className="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center">
-                      <span className="text-indigo-400">📚</span>
-                    </div>
-                    <div>
-                      <h3 className="text-white font-medium">Course Registration Complete</h3>
-                      <p className="text-gray-400 text-sm">Added CS-101 to your schedule</p>
-                    </div>
-                    <span className="text-gray-500 text-sm ml-auto">2h ago</span>
-                  </div>
-                ))}
-              </div>
-            </div>
           </div>
         </main>
       </div>
     </div>
-  );
+  ); 
 } 
