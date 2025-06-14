@@ -2,7 +2,34 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import headingImg from "../assets/heading.png";
 
-const majors = Array.from({ length: 28 }, (_, i) => (i + 1).toString());
+const majors = [
+  "Arab Crossroads Studies (BA)", 
+  "Art and Art History (BA)", 
+  "Bioengineering (BS)", 
+  "Biology (BS)",
+  "Business, Organizations and Society (BA)",
+  "Chemistry (BS)",
+  "Civil Engineering (BS)",
+  "Computer Engineering (BS)",
+  "Computer Science (BS)",
+  "Economics (BA)",
+  "Electrical Engineering (BS)",
+  "Film and New Media (BA)",
+  "General Engineering (BS)",
+  "History (BA)",
+  "Interactive Media (BA)",
+  "Legal Studies (BA)",
+  "Literature and Creative Writing (BA)",
+  "Mathematics (BS)",
+  "Mechanical Engineering (BS)",
+  "Music (BA)",
+  "Philosophy (BA)",
+  "Physics (BS)",
+  "Political Science (BA)",
+  "Psychology (BA)",
+  "Social Research and Public Policy (BA)",
+  "Theater (BA)"
+];
 
 export default function Dashboard() {
   const [search, setSearch] = useState("");
@@ -42,7 +69,7 @@ export default function Dashboard() {
             <button
               key={major}
               onClick={() => navigate(`/major/${major}`)}
-              className="w-full py-4 rounded-lg text-xl font-semibold bg-gradient-to-r from-purple-700 to-purple-500 text-purple-100 shadow-md hover:from-purple-600 hover:to-purple-400 transition"
+              className="w-full py-4 rounded-lg text-xl font-semibold bg-gradient-to-r from-purple-700/60 to-purple-500/60 text-purple-100 shadow-md hover:from-purple-600/90 hover:to-purple-400/90 transition"
             >
               {major}
             </button>
