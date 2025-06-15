@@ -286,7 +286,7 @@ export default function Dashboard() {
       </div>
       <button
         onClick={handleProceed}
-        className="mt-10 px-8 py-3 rounded-lg text-xl font-semibold bg-gradient-to-r from-green-500 to-teal-500 text-white shadow-md hover:from-green-600 hover:to-teal-600 transition disabled:opacity-50"
+        className="mt-10 px-8 py-3 rounded-lg text-xl font-semibold bg-gradient-to-r from-purple-600 to-purple-800 text-white shadow-md hover:from-purple-700 hover:to-purple-900 transition disabled:opacity-50"
         disabled={selectedMajors.length === 0}
       >
         Proceed
