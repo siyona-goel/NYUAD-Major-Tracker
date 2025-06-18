@@ -15,6 +15,30 @@ interface SearchResult {
   category: 'major' | 'minor';
 }
 
+interface PopupProps {
+  message: string;
+  onClose: () => void;
+}
+
+const Popup = ({ message, onClose }: PopupProps) => {
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+      <div className="bg-gray-800/95 border border-purple-400/30 rounded-lg p-6 max-w-md w-full mx-4 shadow-lg">
+        <div className="text-center">
+          <h3 className="text-xl font-semibold text-purple-400 mb-4">Oops!</h3>
+          <p className="text-gray-200 mb-6">{message}</p>
+          <button
+            onClick={onClose}
+            className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default function Dashboard() {
   const [search, setSearch] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -22,6 +46,7 @@ export default function Dashboard() {
   const [selectedMinors, setSelectedMinors] = useState<string[]>([]);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [keyboardIndex, setKeyboardIndex] = useState(-1);
+  const [showPopup, setShowPopup] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
@@ -140,7 +165,22 @@ export default function Dashboard() {
     setKeyboardIndex(-1);
   };
 
+  const isValidCombination = () => {
+    const majorCount = selectedMajors.length;
+    const minorCount = selectedMinors.length;
+
+    return (
+      (majorCount === 2 && minorCount === 0) ||
+      (majorCount === 1 && minorCount === 1) ||
+      (majorCount === 1 && minorCount === 2)
+    );
+  };
+
   const handleProceed = () => {
+    if (!isValidCombination()) {
+      setShowPopup(true);
+      return;
+    }
     navigate("/courses", {
       state: { majors: selectedMajors, minors: selectedMinors },
     });
@@ -148,6 +188,13 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen flex flex-col items-center py-10 px-4">
+      {showPopup && (
+        <Popup
+          message="That combination is not possible."
+          onClose={() => setShowPopup(false)}
+        />
+      )}
+      
       {/* Toast Container */}
       <div className="fixed top-4 right-4 z-50 flex flex-col gap-2">
         {toasts.map(toast => (

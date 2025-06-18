@@ -1,308 +1,357 @@
+import React, { useState, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
+import "react-circular-progressbar/dist/styles.css";
 import { courses } from "../data";
-import type { Course } from "../data";
-import { useState } from "react";
+
+const MANDATORY_REQUIREMENTS = [
+  { id: "fyws", label: "First Year Writing Seminar (FYWS)" },
+  { id: "pe1", label: "PE - 1" },
+  { id: "pe2", label: "PE - 2", prerequisite: "pe1" },
+  { id: "colloquia", label: "Colloquia" },
+  { id: "fieldcol1", label: "Field Colloquia (J-term 1)" },
+  { id: "fieldcol2", label: "Field Colloquia (J-term 2)", prerequisite: "fieldcol1" },
+  { id: "quantitative", label: "Quantitative Reasoning" },
+  { id: "experimental", label: "Experimental Inquiry" },
+  { id: "islamic", label: "Islamic Studies" },
+  { id: "coreadt", label: "Core: Arts, Design and Technology" },
+  { id: "corecea", label: "Core: Cultural Exploration Analysis" },
+  { id: "coredd", label: "Core: Data and Discovery" },
+  { id: "corests", label: "Core: Structures of Thought and Society" },
+];
+
+const PLACEHOLDER_MAJOR_REQS = [
+  { id: "major1-req1", label: "Major Required Course 1" },
+  { id: "major1-req2", label: "Major Required Course 2", prerequisite: "major1-req1" },
+];
+const PLACEHOLDER_MINOR_REQS = [
+  { id: "minor1-req1", label: "Minor Required Course 1" },
+  { id: "minor1-req2", label: "Minor Required Course 2", prerequisite: "minor1-req1" },
+];
+const PLACEHOLDER_MAJOR2_REQS = [
+  { id: "major2-req1", label: "Second Major Required Course 1" },
+  { id: "major2-req2", label: "Second Major Required Course 2", prerequisite: "major2-req1" },
+];
+const PLACEHOLDER_MINOR2_REQS = [
+  { id: "minor2-req1", label: "Second Minor Required Course 1" },
+  { id: "minor2-req2", label: "Second Minor Required Course 2", prerequisite: "minor2-req1" },
+];
+
+const PLACEHOLDER_MAJOR_ELECTIVES = [
+  { id: "majore1", label: "Major Elective 1" },
+  { id: "majore2", label: "Major Elective 2" },
+  { id: "majore3", label: "Major Elective 3" },
+];
+const PLACEHOLDER_MINOR_ELECTIVES = [
+  { id: "minore1", label: "Minor Elective 1" },
+  { id: "minore2", label: "Minor Elective 2" },
+  { id: "minore3", label: "Minor Elective 3" },
+];
+const PLACEHOLDER_MAJOR2_ELECTIVES = [
+  { id: "major2e1", label: "Second Major Elective 1" },
+  { id: "major2e2", label: "Second Major Elective 2" },
+];
+const PLACEHOLDER_MINOR2_ELECTIVES = [
+  { id: "minor2e1", label: "Second Minor Elective 1" },
+  { id: "minor2e2", label: "Second Minor Elective 2" },
+];
+
+const CAPSTONE = [
+  { id: "capstone1", label: "Capstone Project 1" },
+  { id: "capstone2", label: "Capstone Project 2", prerequisite: "capstone1" },
+];
+
+const MILESTONES = [
+  { percent: 25, message: "A quarter down, cutie." },
+  { percent: 50, message: "Halfway hotshot" },
+  { percent: 75, message: "So close you can taste the diploma" },
+  { percent: 100, message: "Degree? Completed it, babe." },
+];
+
+function getHeading(majors: string[], minors: string[]): string {
+  if (majors.length === 2) return `Double major in ${majors[0]} and ${majors[1]}`;
+  if (majors.length === 1 && minors.length === 1) return `Major in ${majors[0]}, with a minor in ${minors[0]}`;
+  if (majors.length === 1 && minors.length === 2) return `Major in ${majors[0]}, with minors in ${minors[0]} and ${minors[1]}`;
+  if (majors.length === 1) return `Major in ${majors[0]}`;
+  return "";
+}
+
+interface CheckboxItem {
+  id: string;
+  label: string;
+  prerequisite?: string;
+}
+
+type SectionState = Record<string, boolean>;
+
+type SetSection = React.Dispatch<React.SetStateAction<SectionState>>;
 
 export default function Courses() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { majors, minors } = location.state || { majors: [], minors: [] };
-  const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
-  const [completedCourses, setCompletedCourses] = useState<string[]>([]);
+  const { majors = [], minors = [] } = location.state || {};
 
-  const coursesByType = {
-    core: courses.filter(course => course.type === 'core'),
-    major: courses.filter(course => course.type === 'major' && majors.includes(course.major!)),
-    minor: courses.filter(course => course.type === 'minor' && minors.includes(course.minor!)),
-    elective: courses.filter(course => course.type === 'elective'),
-    pe: courses.filter(course => course.type === 'pe'),
-    islamic: courses.filter(course => course.type === 'islamic')
-  };
+  // State for checkboxes
+  const [mandatory, setMandatory] = useState<SectionState>({});
+  const [majorReqs, setMajorReqs] = useState<SectionState>({});
+  const [minorReqs, setMinorReqs] = useState<SectionState>({});
+  const [major2Reqs, setMajor2Reqs] = useState<SectionState>({});
+  const [minor2Reqs, setMinor2Reqs] = useState<SectionState>({});
+  const [majorElectives, setMajorElectives] = useState<SectionState>({});
+  const [minorElectives, setMinorElectives] = useState<SectionState>({});
+  const [major2Electives, setMajor2Electives] = useState<SectionState>({});
+  const [minor2Electives, setMinor2Electives] = useState<SectionState>({});
+  const [capstone, setCapstone] = useState<SectionState>({});
 
-  const coursesByCategory = (courses: Course[]) => {
-    return courses.reduce((acc, course) => {
-      const category = course.category || 'Uncategorized';
-      if (!acc[category]) {
-        acc[category] = [];
+  // Gather all checked course IDs
+  const checkedCourseIds = useMemo(() => [
+    ...Object.keys(majorReqs).filter(k => majorReqs[k]),
+    ...Object.keys(minorReqs).filter(k => minorReqs[k]),
+    ...Object.keys(major2Reqs).filter(k => major2Reqs[k]),
+    ...Object.keys(minor2Reqs).filter(k => minor2Reqs[k]),
+    ...Object.keys(majorElectives).filter(k => majorElectives[k]),
+    ...Object.keys(minorElectives).filter(k => minorElectives[k]),
+    ...Object.keys(major2Electives).filter(k => major2Electives[k]),
+    ...Object.keys(minor2Electives).filter(k => minor2Electives[k]),
+    ...Object.keys(capstone).filter(k => capstone[k]),
+    ...Object.keys(mandatory).filter(k => mandatory[k]),
+  ], [majorReqs, minorReqs, major2Reqs, minor2Reqs, majorElectives, minorElectives, major2Electives, minor2Electives, capstone, mandatory]);
+
+  // Calculate credits achieved
+  const credits = useMemo(() => {
+    return checkedCourseIds.reduce((sum, id) => {
+      // Handle mandatory requirements
+      if (id === "pe1" || id === "pe2" || 
+          id === "quantitative" || id === "experimental" || id === "islamic") {
+        return sum; // PE, Quantitative Reasoning, Experimental Inquiry, and Islamic Studies don't count towards credits
       }
-      acc[category].push(course);
-      return acc;
-    }, {} as Record<string, Course[]>);
-  };
-
-  const getPrerequisiteNames = (prerequisites: string[] | undefined) => {
-    if (!prerequisites) return [];
-    return prerequisites.map(preId => {
-      const course = courses.find(c => c.id === preId);
-      return course ? course.name : preId;
-    });
-  };
-
-  const canTakeCourse = (course: Course) => {
-    if (!course.prerequisites) return true;
-    return course.prerequisites.every(preId => completedCourses.includes(preId));
-  };
-
-  const toggleCourseCompletion = (courseId: string) => {
-    const course = courses.find(c => c.id === courseId);
-    if (!course) return;
-
-    if (completedCourses.includes(courseId)) {
-      // Check if this course is a prerequisite for any completed courses
-      const isPrerequisiteForCompleted = courses.some(c => 
-        completedCourses.includes(c.id) && 
-        c.prerequisites?.includes(courseId)
-      );
-
-      if (isPrerequisiteForCompleted) {
-        alert("Cannot uncheck this course as it is a prerequisite for other completed courses.");
-        return;
+      if (id === "fieldcol1" || id === "fieldcol2") {
+        return sum + 3; // J-term courses are 3 credits
       }
-
-      setCompletedCourses(prev => prev.filter(id => id !== courseId));
-    } else {
-      if (!canTakeCourse(course)) {
-        alert("Cannot complete this course until all prerequisites are completed.");
-        return;
+      if (id.startsWith("fyws") || id.startsWith("colloquia") || 
+          id.startsWith("core")) {
+        return sum + 4; // All other mandatory requirements are 4 credits
       }
-      setCompletedCourses(prev => [...prev, courseId]);
-    }
-  };
+      
+      // Handle major/minor requirements and electives
+      if (id.startsWith("major") || id.startsWith("minor") || id.startsWith("capstone")) {
+        return sum + 4; // All major/minor courses and capstone are 4 credits
+      }
+      
+      return sum;
+    }, 0);
+  }, [checkedCourseIds]);
 
-  const calculateProgress = (courseList: Course[]) => {
-    const required = courseList.filter(c => c.required);
-    if (required.length === 0) return 0;
-    const completed = required.filter(c => completedCourses.includes(c.id));
-    return (completed.length / required.length) * 100;
-  };
+  // Calculate degree progress (including 0-credit courses)
+  const totalRequirements = MANDATORY_REQUIREMENTS.length + 
+    PLACEHOLDER_MAJOR_REQS.length + 
+    PLACEHOLDER_MINOR_REQS.length + 
+    PLACEHOLDER_MAJOR2_REQS.length + 
+    PLACEHOLDER_MINOR2_REQS.length + 
+    CAPSTONE.length;
+  
+  const completedRequirements = checkedCourseIds.length;
+  const percentComplete = Math.round((completedRequirements / totalRequirements) * 100);
 
-  const CourseCard = ({ course }: { course: Course }) => {
-    const isSelected = selectedCourseId === course.id;
-    const prerequisites = getPrerequisiteNames(course.prerequisites);
-    const isCompleted = completedCourses.includes(course.id);
-    const canTake = canTakeCourse(course);
-    
-    return (
-      <div 
-        className={`p-4 rounded-lg cursor-pointer transition-all duration-300 backdrop-blur-sm border border-opacity-20 
-          ${isCompleted 
-            ? "bg-green-700/30 border-green-400 shadow-[0_0_15px_rgba(74,222,128,0.3)]"
-            : isSelected 
-              ? "bg-purple-700/30 border-purple-400 shadow-[0_0_15px_rgba(167,139,250,0.3)]" 
-              : canTake
-                ? "bg-gray-800/20 border-purple-300/30 hover:bg-gray-700/30 hover:border-purple-400/50"
-                : "bg-gray-800/10 border-red-300/30 opacity-60"
-          } relative overflow-hidden group`}
-        onClick={() => setSelectedCourseId(isSelected ? null : course.id)}
-      >
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-500/5 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
-        
-        <div className="flex justify-between items-start mb-2">
-          <h3 className="font-semibold text-white">{course.name}</h3>
-          <div className="flex items-center gap-2">
-            <span className="text-purple-300 text-sm">{course.credits} cr</span>
-            <div 
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleCourseCompletion(course.id);
-              }}
-              className={`w-5 h-5 rounded-full border-2 transition-all duration-300 cursor-pointer relative
-                ${!canTake && !isCompleted
-                  ? "border-red-400/50 bg-red-400/10 cursor-not-allowed"
-                  : isCompleted 
-                    ? "border-green-400 bg-green-400/20" 
-                    : "border-purple-400/50 hover:border-purple-400 bg-purple-400/10"
-                }`}
-            >
-              {isCompleted && (
-                <svg 
-                  className="w-3 h-3 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-green-400" 
-                  fill="none" 
-                  viewBox="0 0 24 24" 
-                  stroke="currentColor"
-                >
-                  <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    strokeWidth={3} 
-                    d="M5 13l4 4L19 7" 
-                  />
-                </svg>
+  const totalCredits = 128;
+
+  // Milestone message
+  const milestone = MILESTONES.slice().reverse().find(m => percentComplete >= m.percent);
+
+  // Elective selection logic (max 2 total)
+  const totalElectivesSelected = [
+    ...Object.values(majorElectives),
+    ...Object.values(minorElectives),
+    ...Object.values(major2Electives),
+    ...Object.values(minor2Electives),
+  ].filter(Boolean).length;
+  const electivesDisabled = totalElectivesSelected >= 2;
+
+  // Checkbox handler with prerequisite logic
+  function handleCheck(section: SectionState, setSection: SetSection, id: string, prerequisite?: string) {
+    if (prerequisite && !section[prerequisite]) return;
+    setSection((prev: SectionState) => ({ ...prev, [id]: !prev[id] }));
+  }
+
+  // Render checkboxes
+  function renderCheckboxes(items: CheckboxItem[], section: SectionState, setSection: SetSection) {
+    return items.map(item => (
+      <label key={item.id} className="flex items-center gap-2 mb-2 cursor-pointer select-none">
+        <input
+          type="checkbox"
+          checked={Boolean(section[item.id])}
+          disabled={!!(item.prerequisite && !section[item.prerequisite])}
+          onChange={() => handleCheck(section, setSection, item.id, item.prerequisite)}
+          className="accent-purple-500 w-5 h-5"
+        />
+        <span className={item.prerequisite && !section[item.prerequisite] ? "text-gray-500" : ""}>{item.label}</span>
+      </label>
+    ));
+  }
+
+  return (
+    <div className="min-h-screen bg-black text-white p-6 md:p-10 flex flex-col items-center">
+      <div className="w-full max-w-4xl">
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-3xl md:text-4xl font-bold text-purple-300 text-center w-full">
+            {getHeading(majors, minors)}
+          </h1>
+          <button
+            onClick={() => navigate("/")}
+            className="absolute right-8 top-8 flex items-center gap-2 px-4 py-2 rounded-lg bg-purple-500/10 border border-purple-400/30 hover:bg-purple-500/20 hover:border-purple-400/50 transition-all duration-300 group"
+          >
+            <svg className="w-5 h-5 text-purple-400 transform transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            <span className="text-purple-300">Back</span>
+          </button>
+        </div>
+        {/* Progress Circles */}
+        <div className="flex flex-col md:flex-row gap-8 justify-center items-center mb-10">
+          <div className="w-48 h-48 flex flex-col items-center">
+            <CircularProgressbar
+              value={credits}
+              maxValue={totalCredits}
+              text={`${credits} / 128`}
+              styles={buildStyles({
+                pathColor: "#a78bfa",
+                textColor: "#fff",
+                trailColor: "#312e81",
+                textSize: "20px",
+              })}
+            />
+            <div className="mt-3 text-purple-300 font-semibold text-center text-lg">Credits Achieved</div>
+          </div>
+          <div className="w-48 h-48 flex flex-col items-center">
+            <CircularProgressbar
+              value={percentComplete}
+              maxValue={100}
+              text={`${percentComplete}%`}
+              styles={buildStyles({
+                pathColor: "#a78bfa",
+                textColor: "#fff",
+                trailColor: "#312e81",
+                textSize: "20px",
+              })}
+            />
+            <div className="mt-3 text-purple-300 font-semibold text-center text-lg">Degree Progress</div>
+          </div>
+        </div>
+        {/* Milestone Message */}
+        {milestone && (
+          <div className="text-center text-xl font-bold text-purple-400 mb-8 animate-pulse">{milestone.message}</div>
+        )}
+        {/* Mandatory Requirements */}
+        <div className="bg-gray-900/70 border border-purple-400/30 rounded-lg p-6 mb-8">
+          <h2 className="text-2xl font-bold text-purple-300 mb-4 text-center">Mandatory Requirements</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8">
+            <div>{renderCheckboxes(MANDATORY_REQUIREMENTS.slice(0, 7), mandatory, setMandatory)}</div>
+            <div>{renderCheckboxes(MANDATORY_REQUIREMENTS.slice(7), mandatory, setMandatory)}</div>
+          </div>
+        </div>
+        {/* Major/Minor/Double Major Requirements */}
+        <div className="flex flex-col md:flex-row gap-8 mb-8">
+          <div className="flex-1 bg-gray-900/70 border border-purple-400/30 rounded-lg p-6">
+            <h3 className="text-xl font-bold text-purple-200 mb-4 text-center">Major Requirements</h3>
+            {renderCheckboxes(PLACEHOLDER_MAJOR_REQS, majorReqs, setMajorReqs)}
+            <div className="mt-6">
+              <h4 className="font-semibold text-purple-300 mb-2">Major Electives</h4>
+              {renderCheckboxes(PLACEHOLDER_MAJOR_ELECTIVES, majorElectives, setMajorElectives).map((el, i) =>
+                React.cloneElement(el, {
+                  key: el.key,
+                  children: [
+                    el.props.children[0],
+                    React.cloneElement(el.props.children[1], {
+                      className: electivesDisabled && !majorElectives[PLACEHOLDER_MAJOR_ELECTIVES[i].id] ? "text-gray-500" : ""
+                    })
+                  ],
+                  disabled: electivesDisabled && !majorElectives[PLACEHOLDER_MAJOR_ELECTIVES[i].id],
+                })
               )}
             </div>
           </div>
-        </div>
-        
-        <p className="text-sm text-purple-200/70 mb-2">{course.id}</p>
-        
-        {!canTake && !isCompleted && (
-          <div className="text-xs text-red-400 mb-2">
-            Prerequisites not met
-          </div>
-        )}
-
-        {course.required && (
-          <div className="text-xs text-yellow-400 mb-2">
-            Required Course
-          </div>
-        )}
-        
-        {isSelected && (
-          <>
-            <p className="text-sm text-gray-300 mt-2">{course.description}</p>
-            
-            {prerequisites.length > 0 && (
-              <div className="mt-2">
-                <p className="text-sm font-semibold text-purple-300">Prerequisites:</p>
-                <ul className="list-disc list-inside text-sm">
-                  {prerequisites.map(pre => {
-                    const preReqCourse = courses.find(c => c.name === pre);
-                    const isPreReqCompleted = preReqCourse && completedCourses.includes(preReqCourse.id);
-                    return (
-                      <li 
-                        key={pre} 
-                        className={isPreReqCompleted ? "text-green-400" : "text-gray-300"}
-                      >
-                        {pre}
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-            )}
-            
-            <div className="mt-2">
-              <p className="text-sm font-semibold text-purple-300">Offered in:</p>
-              <div className="flex gap-2 mt-1">
-                {course.semester_offered.map(semester => (
-                  <span 
-                    key={semester}
-                    className="text-xs px-2 py-1 rounded-full bg-purple-500/20 text-purple-200"
-                  >
-                    {semester}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </>
-        )}
-      </div>
-    );
-  };
-
-  const ProgressBar = ({ value }: { value: number }) => (
-    <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
-      <div 
-        className="h-full bg-gradient-to-r from-purple-500 to-purple-300 transition-all duration-300"
-        style={{ width: `${value}%` }}
-      />
-    </div>
-  );
-
-  const CourseSection = ({ 
-    title, 
-    courses: sectionCourses, 
-    description 
-  }: { 
-    title: string; 
-    courses: Course[]; 
-    description?: string 
-  }) => {
-    const categorizedCourses = coursesByCategory(sectionCourses);
-    const progress = calculateProgress(sectionCourses);
-
-    return (
-      <div className="mb-12">
-        <div className="flex items-center justify-between mb-2">
-          <h2 className="text-2xl font-bold text-purple-300">{title}</h2>
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-purple-200">{Math.round(progress)}% Complete</span>
-            <div className="w-32">
-              <ProgressBar value={progress} />
+          <div className="flex-1 bg-gray-900/70 border border-purple-400/30 rounded-lg p-6">
+            <h3 className="text-xl font-bold text-purple-200 mb-4 text-center">
+              {majors.length === 2 ? "Second Major Requirements" : minors.length === 2 ? "Minor Requirements" : minors.length === 1 ? "Minor Requirements" : ""}
+            </h3>
+            {majors.length === 2
+              ? renderCheckboxes(PLACEHOLDER_MAJOR2_REQS, major2Reqs, setMajor2Reqs)
+              : minors.length === 2
+                ? <>
+                    {renderCheckboxes(PLACEHOLDER_MINOR_REQS, minorReqs, setMinorReqs)}
+                    <div className="mt-4" />
+                    {renderCheckboxes(PLACEHOLDER_MINOR2_REQS, minor2Reqs, setMinor2Reqs)}
+                  </>
+                : minors.length === 1
+                  ? renderCheckboxes(PLACEHOLDER_MINOR_REQS, minorReqs, setMinorReqs)
+                  : null}
+            <div className="mt-6">
+              <h4 className="font-semibold text-purple-300 mb-2">{majors.length === 2 ? "Second Major Electives" : "Minor Electives"}</h4>
+              {majors.length === 2
+                ? renderCheckboxes(PLACEHOLDER_MAJOR2_ELECTIVES, major2Electives, setMajor2Electives).map((el, i) =>
+                    React.cloneElement(el, {
+                      key: el.key,
+                      children: [
+                        el.props.children[0],
+                        React.cloneElement(el.props.children[1], {
+                          className: electivesDisabled && !major2Electives[PLACEHOLDER_MAJOR2_ELECTIVES[i].id] ? "text-gray-500" : ""
+                        })
+                      ],
+                      disabled: electivesDisabled && !major2Electives[PLACEHOLDER_MAJOR2_ELECTIVES[i].id],
+                    })
+                  )
+                : minors.length === 2
+                  ? [
+                      ...renderCheckboxes(PLACEHOLDER_MINOR_ELECTIVES, minorElectives, setMinorElectives).map((el, i) =>
+                        React.cloneElement(el, {
+                          key: el.key,
+                          children: [
+                            el.props.children[0],
+                            React.cloneElement(el.props.children[1], {
+                              className: electivesDisabled && !minorElectives[PLACEHOLDER_MINOR_ELECTIVES[i].id] ? "text-gray-500" : ""
+                            })
+                          ],
+                          disabled: electivesDisabled && !minorElectives[PLACEHOLDER_MINOR_ELECTIVES[i].id],
+                        })
+                      ),
+                      ...renderCheckboxes(PLACEHOLDER_MINOR2_ELECTIVES, minor2Electives, setMinor2Electives).map((el, i) =>
+                        React.cloneElement(el, {
+                          key: el.key,
+                          children: [
+                            el.props.children[0],
+                            React.cloneElement(el.props.children[1], {
+                              className: electivesDisabled && !minor2Electives[PLACEHOLDER_MINOR2_ELECTIVES[i].id] ? "text-gray-500" : ""
+                            })
+                          ],
+                          disabled: electivesDisabled && !minor2Electives[PLACEHOLDER_MINOR2_ELECTIVES[i].id],
+                        })
+                      )
+                    ]
+                  : minors.length === 1
+                    ? renderCheckboxes(PLACEHOLDER_MINOR_ELECTIVES, minorElectives, setMinorElectives).map((el, i) =>
+                        React.cloneElement(el, {
+                          key: el.key,
+                          children: [
+                            el.props.children[0],
+                            React.cloneElement(el.props.children[1], {
+                              className: electivesDisabled && !minorElectives[PLACEHOLDER_MINOR_ELECTIVES[i].id] ? "text-gray-500" : ""
+                            })
+                          ],
+                          disabled: electivesDisabled && !minorElectives[PLACEHOLDER_MINOR_ELECTIVES[i].id],
+                        })
+                      )
+                    : null}
             </div>
           </div>
         </div>
-        {description && <p className="text-gray-400 mb-6 text-sm">{description}</p>}
-        
-        {Object.entries(categorizedCourses).map(([category, categoryCourses]) => (
-          <div key={category} className="mb-8">
-            <h3 className="text-lg font-semibold text-purple-400 mb-4">{category}</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {categoryCourses.map(course => (
-                <CourseCard key={course.id} course={course} />
-              ))}
-            </div>
+        {/* Capstone Section */}
+        <div className="bg-gray-900/70 border border-purple-400/30 rounded-lg p-6 mb-8">
+          <h2 className="text-2xl font-bold text-purple-300 mb-4 text-center">CAPSTONE</h2>
+          <div className="flex flex-col md:flex-row gap-8 justify-center items-center">
+            {renderCheckboxes(CAPSTONE, capstone, setCapstone)}
           </div>
-        ))}
+        </div>
       </div>
-    );
-  };
-
-  return (
-    <div className="min-h-screen text-white p-6 md:p-10">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-4xl font-bold text-purple-400">Course Requirements & Progress</h1>
-        <button
-          onClick={() => navigate('/')}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-purple-500/10 border border-purple-400/30 
-            hover:bg-purple-500/20 hover:border-purple-400/50 transition-all duration-300 group"
-        >
-          <svg
-            className="w-5 h-5 text-purple-400 transform transition-transform group-hover:-translate-x-1"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M10 19l-7-7m0 0l7-7m-7 7h18"
-            />
-          </svg>
-          <span className="text-purple-300">Back to Dashboard</span>
-        </button>
-      </div>
-      
-      <CourseSection 
-        title="Core Requirements" 
-        courses={coursesByType.core}
-        description="Foundational courses required for all students"
-      />
-      
-      {coursesByType.major.length > 0 && (
-        <CourseSection 
-          title="Major Requirements" 
-          courses={coursesByType.major}
-          description={`Required courses for your selected major${majors.length > 1 ? 's' : ''}: ${majors.join(', ')}`}
-        />
-      )}
-      
-      {coursesByType.minor.length > 0 && (
-        <CourseSection 
-          title="Minor Requirements" 
-          courses={coursesByType.minor}
-          description={`Required courses for your selected minor${minors.length > 1 ? 's' : ''}: ${minors.join(', ')}`}
-        />
-      )}
-      
-      <CourseSection 
-        title="Electives" 
-        courses={coursesByType.elective}
-        description="Choose any three courses from this pool of electives"
-      />
-      
-      <CourseSection 
-        title="Physical Education Requirement" 
-        courses={coursesByType.pe}
-        description="Complete at least one PE course"
-      />
-      
-      <CourseSection 
-        title="Islamic Studies Requirement" 
-        courses={coursesByType.islamic}
-        description="Complete one course in Islamic Studies"
-      />
     </div>
   );
 } 
