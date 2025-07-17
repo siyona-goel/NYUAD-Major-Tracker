@@ -86,6 +86,14 @@ type SectionState = Record<string, boolean>;
 
 type SetSection = React.Dispatch<React.SetStateAction<SectionState>>;
 
+// Utility to convert course to CheckboxItem
+function courseToCheckboxItem(course: any) {
+  return {
+    id: `${course.major || ''}-${course.minor || ''}-${course.name}`.replace(/\s+/g, '-').toLowerCase(),
+    label: course.name
+  };
+}
+
 export default function Courses() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -95,13 +103,27 @@ export default function Courses() {
   const [mandatory, setMandatory] = useState<SectionState>({});
   const [majorReqs, setMajorReqs] = useState<SectionState>({});
   const [minorReqs, setMinorReqs] = useState<SectionState>({});
-  const [major2Reqs, setMajor2Reqs] = useState<SectionState>({});
-  const [minor2Reqs, setMinor2Reqs] = useState<SectionState>({});
   const [majorElectives, setMajorElectives] = useState<SectionState>({});
   const [minorElectives, setMinorElectives] = useState<SectionState>({});
+  const [major2Reqs, setMajor2Reqs] = useState<SectionState>({});
+  const [minor2Reqs, setMinor2Reqs] = useState<SectionState>({});
   const [major2Electives, setMajor2Electives] = useState<SectionState>({});
   const [minor2Electives, setMinor2Electives] = useState<SectionState>({});
   const [capstone, setCapstone] = useState<SectionState>({});
+
+  // Filter courses for selected major/minor
+  const major = majors[0] || null;
+  const minor = minors[0] || null;
+
+  const majorReqCourses = courses.filter(c => c.major === major && c['major req']);
+  const majorElecCourses = courses.filter(c => c.major === major && c['maj elec']);
+  const minorReqCourses = courses.filter(c => c.minor === minor && c['minor req']);
+  const minorElecCourses = courses.filter(c => c.minor === minor && c['min elec']);
+
+  const majorReqItems = majorReqCourses.map(courseToCheckboxItem);
+  const majorElecItems = majorElecCourses.map(courseToCheckboxItem);
+  const minorReqItems = minorReqCourses.map(courseToCheckboxItem);
+  const minorElecItems = minorElecCourses.map(courseToCheckboxItem);
 
   // Gather all checked course IDs
   const checkedCourseIds = useMemo(() => [
@@ -167,20 +189,32 @@ export default function Courses() {
   ].filter(Boolean).length;
   const electivesDisabled = totalElectivesSelected >= 2;
 
+  // Count checked electives for each group
+  const majorElectivesChecked = Object.values(majorElectives).filter(Boolean).length;
+  const minorElectivesChecked = Object.values(minorElectives).filter(Boolean).length;
+
   // Checkbox handler with prerequisite logic
   function handleCheck(section: SectionState, setSection: SetSection, id: string, prerequisite?: string) {
     if (prerequisite && !section[prerequisite]) return;
     setSection((prev: SectionState) => ({ ...prev, [id]: !prev[id] }));
   }
 
-  // Render checkboxes
-  function renderCheckboxes(items: CheckboxItem[], section: SectionState, setSection: SetSection) {
+  // Update renderCheckboxes to accept a shouldDisable function
+  function renderCheckboxes(
+    items: CheckboxItem[],
+    section: SectionState,
+    setSection: SetSection,
+    shouldDisable?: (item: CheckboxItem) => boolean
+  ) {
     return items.map(item => (
       <label key={item.id} className="flex items-center gap-2 mb-2 cursor-pointer select-none">
         <input
           type="checkbox"
           checked={Boolean(section[item.id])}
-          disabled={!!(item.prerequisite && !section[item.prerequisite])}
+          disabled={
+            (!!(item.prerequisite && !section[item.prerequisite])) ||
+            (shouldDisable && shouldDisable(item))
+          }
           onChange={() => handleCheck(section, setSection, item.id, item.prerequisite)}
           className="accent-purple-500 w-5 h-5"
         />
@@ -253,94 +287,28 @@ export default function Courses() {
         <div className="flex flex-col md:flex-row gap-8 mb-8">
           <div className="flex-1 bg-gray-900/70 border border-purple-400/30 rounded-lg p-6">
             <h3 className="text-xl font-bold text-purple-200 mb-4 text-center">Major Requirements</h3>
-            {renderCheckboxes(PLACEHOLDER_MAJOR_REQS, majorReqs, setMajorReqs)}
+            {renderCheckboxes(majorReqItems, majorReqs, setMajorReqs)}
             <div className="mt-6">
               <h4 className="font-semibold text-purple-300 mb-2">Major Electives</h4>
-              {renderCheckboxes(PLACEHOLDER_MAJOR_ELECTIVES, majorElectives, setMajorElectives).map((el, i) =>
-                React.cloneElement(el, {
-                  key: el.key,
-                  children: [
-                    el.props.children[0],
-                    React.cloneElement(el.props.children[1], {
-                      className: electivesDisabled && !majorElectives[PLACEHOLDER_MAJOR_ELECTIVES[i].id] ? "text-gray-500" : ""
-                    })
-                  ],
-                  disabled: electivesDisabled && !majorElectives[PLACEHOLDER_MAJOR_ELECTIVES[i].id],
-                })
+              {renderCheckboxes(
+                majorElecItems,
+                majorElectives,
+                setMajorElectives,
+                (item) => !majorElectives[item.id] && majorElectivesChecked >= 2
               )}
             </div>
           </div>
           <div className="flex-1 bg-gray-900/70 border border-purple-400/30 rounded-lg p-6">
-            <h3 className="text-xl font-bold text-purple-200 mb-4 text-center">
-              {majors.length === 2 ? "Second Major Requirements" : minors.length === 2 ? "Minor Requirements" : minors.length === 1 ? "Minor Requirements" : ""}
-            </h3>
-            {majors.length === 2
-              ? renderCheckboxes(PLACEHOLDER_MAJOR2_REQS, major2Reqs, setMajor2Reqs)
-              : minors.length === 2
-                ? <>
-                    {renderCheckboxes(PLACEHOLDER_MINOR_REQS, minorReqs, setMinorReqs)}
-                    <div className="mt-4" />
-                    {renderCheckboxes(PLACEHOLDER_MINOR2_REQS, minor2Reqs, setMinor2Reqs)}
-                  </>
-                : minors.length === 1
-                  ? renderCheckboxes(PLACEHOLDER_MINOR_REQS, minorReqs, setMinorReqs)
-                  : null}
+            <h3 className="text-xl font-bold text-purple-200 mb-4 text-center">Minor Requirements</h3>
+            {renderCheckboxes(minorReqItems, minorReqs, setMinorReqs)}
             <div className="mt-6">
-              <h4 className="font-semibold text-purple-300 mb-2">{majors.length === 2 ? "Second Major Electives" : "Minor Electives"}</h4>
-              {majors.length === 2
-                ? renderCheckboxes(PLACEHOLDER_MAJOR2_ELECTIVES, major2Electives, setMajor2Electives).map((el, i) =>
-                    React.cloneElement(el, {
-                      key: el.key,
-                      children: [
-                        el.props.children[0],
-                        React.cloneElement(el.props.children[1], {
-                          className: electivesDisabled && !major2Electives[PLACEHOLDER_MAJOR2_ELECTIVES[i].id] ? "text-gray-500" : ""
-                        })
-                      ],
-                      disabled: electivesDisabled && !major2Electives[PLACEHOLDER_MAJOR2_ELECTIVES[i].id],
-                    })
-                  )
-                : minors.length === 2
-                  ? [
-                      ...renderCheckboxes(PLACEHOLDER_MINOR_ELECTIVES, minorElectives, setMinorElectives).map((el, i) =>
-                        React.cloneElement(el, {
-                          key: el.key,
-                          children: [
-                            el.props.children[0],
-                            React.cloneElement(el.props.children[1], {
-                              className: electivesDisabled && !minorElectives[PLACEHOLDER_MINOR_ELECTIVES[i].id] ? "text-gray-500" : ""
-                            })
-                          ],
-                          disabled: electivesDisabled && !minorElectives[PLACEHOLDER_MINOR_ELECTIVES[i].id],
-                        })
-                      ),
-                      ...renderCheckboxes(PLACEHOLDER_MINOR2_ELECTIVES, minor2Electives, setMinor2Electives).map((el, i) =>
-                        React.cloneElement(el, {
-                          key: el.key,
-                          children: [
-                            el.props.children[0],
-                            React.cloneElement(el.props.children[1], {
-                              className: electivesDisabled && !minor2Electives[PLACEHOLDER_MINOR2_ELECTIVES[i].id] ? "text-gray-500" : ""
-                            })
-                          ],
-                          disabled: electivesDisabled && !minor2Electives[PLACEHOLDER_MINOR2_ELECTIVES[i].id],
-                        })
-                      )
-                    ]
-                  : minors.length === 1
-                    ? renderCheckboxes(PLACEHOLDER_MINOR_ELECTIVES, minorElectives, setMinorElectives).map((el, i) =>
-                        React.cloneElement(el, {
-                          key: el.key,
-                          children: [
-                            el.props.children[0],
-                            React.cloneElement(el.props.children[1], {
-                              className: electivesDisabled && !minorElectives[PLACEHOLDER_MINOR_ELECTIVES[i].id] ? "text-gray-500" : ""
-                            })
-                          ],
-                          disabled: electivesDisabled && !minorElectives[PLACEHOLDER_MINOR_ELECTIVES[i].id],
-                        })
-                      )
-                    : null}
+              <h4 className="font-semibold text-purple-300 mb-2">Minor Electives</h4>
+              {renderCheckboxes(
+                minorElecItems,
+                minorElectives,
+                setMinorElectives,
+                (item) => !minorElectives[item.id] && minorElectivesChecked >= 2
+              )}
             </div>
           </div>
         </div>
