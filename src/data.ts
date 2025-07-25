@@ -86,7 +86,19 @@ export const courses = [
     'major req': true,
     'minor req': true,
     'maj elec': false,
-    'min elec': false
+    'min elec': false,
+    prerequisites: null
+  },
+  {
+    name: 'Calculus w/ Applications to Science & Engr',
+    credits: 4,
+    major: 'Computer Science',
+    minor: 'Computer Science',
+    'major req': true,
+    'minor req': true,
+    'maj elec': false,
+    'min elec': false,
+    prerequisites: null
   },
   {
     name: 'Discrete Mathematics',
@@ -96,7 +108,8 @@ export const courses = [
     'major req': true,
     'minor req': true,
     'maj elec': false,
-    'min elec': false
+    'min elec': false,
+    prerequisites: null
   },
   {
     name: 'Data Structures',
@@ -106,7 +119,8 @@ export const courses = [
     'major req': true,
     'minor req': true,
     'maj elec': false,
-    'min elec': false
+    'min elec': false,
+    prerequisites: ['Introduction to Computer Science']
   },
   {
     name: 'Computer Systems Organization',
@@ -116,7 +130,8 @@ export const courses = [
     'major req': true,
     'minor req': true,
     'maj elec': false,
-    'min elec': false
+    'min elec': false,
+    prerequisites: ['Data Structures']
   },
   {
     name: 'Algorithms',
@@ -126,7 +141,8 @@ export const courses = [
     'major req': true,
     'minor req': true,
     'maj elec': false,
-    'min elec': false
+    'min elec': false,
+    prerequisites: ['Discrete Mathematics']
   },
   {
     name: 'Software Engineering',
@@ -136,7 +152,8 @@ export const courses = [
     'major req': true,
     'minor req': true,
     'maj elec': false,
-    'min elec': false
+    'min elec': false,
+    prerequisites: ['Algorithms', 'Data Structures']
   },
   {
     name: 'Computer Networks',
@@ -146,7 +163,8 @@ export const courses = [
     'major req': false,
     'minor req': false,
     'maj elec': false,
-    'min elec': false
+    'min elec': false,
+    prerequisites: ['Algorithms', 'Computer Systems Organization']
   },  
   {
     name: 'Operating Systems',
@@ -156,7 +174,8 @@ export const courses = [
     'major req': true,
     'minor req': false,
     'maj elec': false,
-    'min elec': false
+    'min elec': false,
+    prerequisites: ['Algorithms', 'Computer Systems Organization']
   },
   {
     name: 'Research Seminar in Computer Science',
@@ -166,7 +185,8 @@ export const courses = [
     'major req': true,
     'minor req': false,
     'maj elec': false,
-    'min elec': false
+    'min elec': false,
+    prerequisites: ['Algorithms', 'Computer Systems Organization', 'Calculus w/ Applications to Science & Engr']
   },
   {
     name: 'Database Systems',
@@ -176,7 +196,8 @@ export const courses = [
     'major req': false,
     'minor req': false,
     'maj elec': true,
-    'min elec': true
+    'min elec': true,
+    prerequisites: null
   },
   {
     name: 'Natural Language Processing',
@@ -186,7 +207,8 @@ export const courses = [
     'major req': false,
     'minor req': false,
     'maj elec': true,
-    'min elec': true
+    'min elec': true,
+    prerequisites: null
   },
   {
     name: 'Algorithmic Foundations of Data Science',
@@ -196,7 +218,8 @@ export const courses = [
     'major req': false,
     'minor req': false,
     'maj elec': true,
-    'min elec': true
+    'min elec': true,
+    prerequisites: ['Algorithms', 'Data Structures']
   },
   {
     name: 'Computational Social Science',
@@ -206,7 +229,8 @@ export const courses = [
     'major req': false,
     'minor req': false,
     'maj elec': true,
-    'min elec': true
+    'min elec': true,
+    prerequisites: null
   },
   {
     name: 'Machine Learning',
@@ -216,7 +240,8 @@ export const courses = [
     'major req': false,
     'minor req': false,
     'maj elec': true,
-    'min elec': true
+    'min elec': true,
+    prerequisites: ['Algorithms']
   },
   {
     name: 'Arabic Computational Linguistics',
@@ -226,7 +251,8 @@ export const courses = [
     'major req': false,
     'minor req': false,
     'maj elec': true,
-    'min elec': true
+    'min elec': true,
+    prerequisites: ['Data Structures']
   },
   {
     name: 'Computer Security',
@@ -236,7 +262,8 @@ export const courses = [
     'major req': false,
     'minor req': false,
     'maj elec': true,
-    'min elec': true
+    'min elec': true,
+    prerequisites: null
   },
   {
     name: 'Quantum Computing',
@@ -246,7 +273,8 @@ export const courses = [
     'major req': false,
     'minor req': false,
     'maj elec': true,
-    'min elec': true
+    'min elec': true,
+    prerequisites: null
   },
   {
     name: 'Advanced Topics in AI and Machine Learning',
@@ -256,10 +284,9 @@ export const courses = [
     'major req': false,
     'minor req': false,
     'maj elec': true,
-    'min elec': true
+    'min elec': true,
+    prerequisites: null
   },
-
-
 
   
   {
@@ -270,7 +297,8 @@ export const courses = [
     'major req': true,
     'minor req': false,
     'maj elec': false,
-    'min elec': false
+    'min elec': false,
+    prerequisites: null
   },
   {
     name: 'Principles of Macroeconomics',
@@ -280,7 +308,8 @@ export const courses = [
     'major req': true,
     'minor req': false,
     'maj elec': false,
-    'min elec': false
+    'min elec': false,
+    prerequisites: null
   },
   {
     name: 'Intermediate Microeconomics',
@@ -290,7 +319,8 @@ export const courses = [
     'major req': true,
     'minor req': false,
     'maj elec': false,
-    'min elec': false
+    'min elec': false,
+    prerequisites: null
   },
   {
     name: 'Intermediate Macroeconomics',
@@ -300,7 +330,8 @@ export const courses = [
     'major req': true,
     'minor req': false,
     'maj elec': false,
-    'min elec': false
+    'min elec': false,
+    prerequisites: null
   },
   {
     name: 'Econometrics',
@@ -310,9 +341,9 @@ export const courses = [
     'major req': true,
     'minor req': false,
     'maj elec': false,
-    'min elec': false
-  },
-  
+    'min elec': false,
+    prerequisites: null
+  },  
 
 
   {
@@ -323,7 +354,8 @@ export const courses = [
     'major req': true,
     'minor req': true,
     'maj elec': false,
-    'min elec': false
+    'min elec': false,
+    prerequisites: null
   },
   {
     name: 'Interaction Design Studio',
@@ -333,7 +365,8 @@ export const courses = [
     'major req': false,
     'minor req': false,
     'maj elec': true,
-    'min elec': true
+    'min elec': true,
+    prerequisites: null
   },
   {
     name: 'Communications Lab',
@@ -343,7 +376,8 @@ export const courses = [
     'major req': true,
     'minor req': true,
     'maj elec': false,
-    'min elec': false
+    'min elec': false,
+    prerequisites: null
   },
   {
     name: 'Application Development',
@@ -353,7 +387,8 @@ export const courses = [
     'major req': false,
     'minor req': false,
     'maj elec': true,
-    'min elec': true
+    'min elec': true,
+    prerequisites: null
   },
   {
     name: 'Digital Sound Design',
@@ -363,7 +398,8 @@ export const courses = [
     'major req': false,
     'minor req': false,
     'maj elec': true,
-    'min elec': true
+    'min elec': true,
+    prerequisites: null
   },
   {
     name: 'Desert Media Art',
@@ -373,12 +409,11 @@ export const courses = [
     'major req': false,
     'minor req': false,
     'maj elec': false,
-    'min elec': true
+    'min elec': true,
+    prerequisites: null
   },
 
 
-
-  // Psychology Minor Courses
   {
     name: 'Introduction to Psychology',
     credits: 4,
@@ -387,7 +422,8 @@ export const courses = [
     'major req': false,
     'minor req': true,
     'maj elec': false,
-    'min elec': false
+    'min elec': false,
+    prerequisites: null
   },
   {
     name: 'Research Methods in Psychology',
@@ -397,7 +433,8 @@ export const courses = [
     'major req': false,
     'minor req': true,
     'maj elec': false,
-    'min elec': false
+    'min elec': false,
+    prerequisites: null
   },
   {
     name: 'Cognitive Psychology',
@@ -407,7 +444,8 @@ export const courses = [
     'major req': true,
     'minor req': false,
     'maj elec': false,
-    'min elec': false
+    'min elec': false,
+    prerequisites: null
   },
   {
     name: 'Social Psychology',
@@ -417,6 +455,7 @@ export const courses = [
     'major req': false,
     'minor req': false,
     'maj elec': false,
-    'min elec': false
+    'min elec': false,
+    prerequisites: null
   }
 ]; 

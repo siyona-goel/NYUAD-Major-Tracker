@@ -20,42 +20,6 @@ const MANDATORY_REQUIREMENTS = [
   { id: "corests", label: "Core: Structures of Thought and Society" },
 ];
 
-const PLACEHOLDER_MAJOR_REQS = [
-  { id: "major1-req1", label: "Major Required Course 1" },
-  { id: "major1-req2", label: "Major Required Course 2", prerequisite: "major1-req1" },
-];
-const PLACEHOLDER_MINOR_REQS = [
-  { id: "minor1-req1", label: "Minor Required Course 1" },
-  { id: "minor1-req2", label: "Minor Required Course 2", prerequisite: "minor1-req1" },
-];
-const PLACEHOLDER_MAJOR2_REQS = [
-  { id: "major2-req1", label: "Second Major Required Course 1" },
-  { id: "major2-req2", label: "Second Major Required Course 2", prerequisite: "major2-req1" },
-];
-const PLACEHOLDER_MINOR2_REQS = [
-  { id: "minor2-req1", label: "Second Minor Required Course 1" },
-  { id: "minor2-req2", label: "Second Minor Required Course 2", prerequisite: "minor2-req1" },
-];
-
-const PLACEHOLDER_MAJOR_ELECTIVES = [
-  { id: "majore1", label: "Major Elective 1" },
-  { id: "majore2", label: "Major Elective 2" },
-  { id: "majore3", label: "Major Elective 3" },
-];
-const PLACEHOLDER_MINOR_ELECTIVES = [
-  { id: "minore1", label: "Minor Elective 1" },
-  { id: "minore2", label: "Minor Elective 2" },
-  { id: "minore3", label: "Minor Elective 3" },
-];
-const PLACEHOLDER_MAJOR2_ELECTIVES = [
-  { id: "major2e1", label: "Second Major Elective 1" },
-  { id: "major2e2", label: "Second Major Elective 2" },
-];
-const PLACEHOLDER_MINOR2_ELECTIVES = [
-  { id: "minor2e1", label: "Second Minor Elective 1" },
-  { id: "minor2e2", label: "Second Minor Elective 2" },
-];
-
 const CAPSTONE = [
   { id: "capstone1", label: "Capstone Project 1" },
   { id: "capstone2", label: "Capstone Project 2", prerequisite: "capstone1" },
@@ -93,6 +57,13 @@ function courseToCheckboxItem(course: any) {
     label: course.name
   };
 }
+
+// Create a mapping from checkbox IDs to course objects for quick lookup
+const courseIdToCourse: Record<string, any> = {};
+courses.forEach(course => {
+  const id = `${course.major || ''}-${course.minor || ''}-${course.name}`.replace(/\s+/g, '-').toLowerCase();
+  courseIdToCourse[id] = course;
+});
 
 export default function Courses() {
   const location = useLocation();
@@ -154,26 +125,17 @@ export default function Courses() {
           id.startsWith("core")) {
         return sum + 4; // All other mandatory requirements are 4 credits
       }
-      
-      // Handle major/minor requirements and electives
-      if (id.startsWith("major") || id.startsWith("minor") || id.startsWith("capstone")) {
-        return sum + 4; // All major/minor courses and capstone are 4 credits
+      // For major/minor/capstone, use the actual course credits if available
+      if (courseIdToCourse[id]) {
+        return sum + (courseIdToCourse[id].credits || 0);
       }
-      
+      // Fallback for any other case (shouldn't happen)
       return sum;
     }, 0);
   }, [checkedCourseIds]);
 
-  // Calculate degree progress (including 0-credit courses)
-  const totalRequirements = MANDATORY_REQUIREMENTS.length + 
-    PLACEHOLDER_MAJOR_REQS.length + 
-    PLACEHOLDER_MINOR_REQS.length + 
-    PLACEHOLDER_MAJOR2_REQS.length + 
-    PLACEHOLDER_MINOR2_REQS.length + 
-    CAPSTONE.length;
-  
-  const completedRequirements = checkedCourseIds.length;
-  const percentComplete = Math.round((completedRequirements / totalRequirements) * 100);
+  // Calculate degree progress (now based on credits achieved)
+  const percentComplete = Math.round((credits / 128) * 100);
 
   const totalCredits = 128;
 
@@ -195,6 +157,36 @@ export default function Courses() {
 
   // Checkbox handler with prerequisite logic
   function handleCheck(section: SectionState, setSection: SetSection, id: string, prerequisite?: string) {
+    // Check if this is a course checkbox (exists in courseIdToCourse)
+    if (courseIdToCourse[id]) {
+      const course = courseIdToCourse[id];
+      if (course.prerequisites && Array.isArray(course.prerequisites)) {
+        // Check if all prerequisites are checked
+        const prereqIds = course.prerequisites.map((prereqName: string) => {
+          // Find the course with this name and generate its ID
+          const prereqCourse = courses.find(c => c.name === prereqName && c.major === course.major && c.minor === course.minor);
+          if (!prereqCourse) return null;
+          return `${prereqCourse.major || ''}-${prereqCourse.minor || ''}-${prereqCourse.name}`.replace(/\s+/g, '-').toLowerCase();
+        }).filter(Boolean);
+        const allPrereqsChecked = prereqIds.every((prereqId: string) => {
+          // Find which section this prereq would be in
+          return (
+            majorReqs[prereqId] ||
+            minorReqs[prereqId] ||
+            majorElectives[prereqId] ||
+            minorElectives[prereqId] ||
+            major2Reqs[prereqId] ||
+            minor2Reqs[prereqId] ||
+            major2Electives[prereqId] ||
+            minor2Electives[prereqId]
+          );
+        });
+        if (!allPrereqsChecked) {
+          alert("You must complete all prerequisites before selecting this course.");
+          return;
+        }
+      }
+    }
     if (prerequisite && !section[prerequisite]) return;
     setSection((prev: SectionState) => ({ ...prev, [id]: !prev[id] }));
   }
