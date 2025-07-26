@@ -81,6 +81,7 @@ export default function Courses() {
   const [major2Electives, setMajor2Electives] = useState<SectionState>({});
   const [minor2Electives, setMinor2Electives] = useState<SectionState>({});
   const [capstone, setCapstone] = useState<SectionState>({});
+  const [generalElectives, setGeneralElectives] = useState<number>(0);
 
   // Filter courses for selected major/minor
   const major = majors[0] || null;
@@ -112,7 +113,7 @@ export default function Courses() {
 
   // Calculate credits achieved
   const credits = useMemo(() => {
-    return checkedCourseIds.reduce((sum, id) => {
+    let totalCredits = checkedCourseIds.reduce((sum, id) => {
       // Handle mandatory requirements
       if (id === "pe1" || id === "pe2" || 
           id === "quantitative" || id === "experimental" || id === "islamic") {
@@ -132,7 +133,12 @@ export default function Courses() {
       // Fallback for any other case (shouldn't happen)
       return sum;
     }, 0);
-  }, [checkedCourseIds]);
+    
+    // Add general electives credits (4 credits per course)
+    totalCredits += generalElectives * 4;
+    
+    return totalCredits;
+  }, [checkedCourseIds, generalElectives]);
 
   // Calculate degree progress (now based on credits achieved)
   const percentComplete = Math.round((credits / 128) * 100);
@@ -301,6 +307,29 @@ export default function Courses() {
                 setMinorElectives,
                 (item) => !minorElectives[item.id] && minorElectivesChecked >= 2
               )}
+            </div>
+          </div>
+        </div>
+        {/* General Electives Section */}
+        <div className="bg-gray-900/70 border border-purple-400/30 rounded-lg p-6 mb-8">
+          <h2 className="text-2xl font-bold text-purple-300 mb-4 text-center">General Electives</h2>
+          <div className="flex flex-col items-center">
+            <div className="text-center mb-4">
+              <label htmlFor="generalElectives" className="block text-purple-200 mb-2 font-medium">
+                Number of General Elective Courses Completed:
+              </label>
+              <input
+                id="generalElectives"
+                type="number"
+                min="0"
+                max="20"
+                value={generalElectives}
+                onChange={(e) => setGeneralElectives(parseInt(e.target.value) || 0)}
+                className="w-24 px-3 py-2 bg-gray-800/50 border border-purple-400/30 rounded-lg text-white text-center focus:outline-none focus:border-purple-400/60 focus:ring-2 focus:ring-purple-400/20"
+              />
+            </div>
+            <div className="text-purple-300 text-sm">
+              Total Credits from General Electives: {generalElectives * 4}
             </div>
           </div>
         </div>
