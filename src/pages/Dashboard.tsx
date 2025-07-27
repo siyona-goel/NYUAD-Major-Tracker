@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useUser } from "../contexts/UserContext";
 import headingImg from "../assets/heading.png";
 import { majors, minors } from "../data";
 
@@ -49,6 +50,15 @@ export default function Dashboard() {
   const [showPopup, setShowPopup] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const { 
+    currentUser, 
+    userProgress, 
+    updateProgress, 
+    isLoading, 
+    error, 
+    clearError,
+    logout 
+  } = useUser();
 
   const filteredMajors = majors.filter((major) =>
     major.name.toLowerCase().includes(search.toLowerCase())
@@ -84,10 +94,23 @@ export default function Dashboard() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Load user progress on component mount
+  useEffect(() => {
+    if (userProgress) {
+      setSelectedMajors(userProgress.majors);
+      setSelectedMinors(userProgress.minors);
+    }
+  }, [userProgress]);
+
   // Reset keyboard index when search changes
   useEffect(() => {
     setKeyboardIndex(-1);
   }, [search]);
+
+  // Clear error when component mounts
+  useEffect(() => {
+    clearError();
+  }, [clearError]);
 
   const showToast = (message: string, type: 'add' | 'remove') => {
     const id = Date.now();
@@ -97,26 +120,46 @@ export default function Dashboard() {
     }, 2000);
   };
 
-  const handleMajorSelect = (major: string) => {
+  const handleMajorSelect = async (major: string) => {
     const isRemoving = selectedMajors.includes(major);
-    showToast(
-      isRemoving ? `Removed ${major} from majors` : `Added ${major} to majors`,
-      isRemoving ? 'remove' : 'add'
-    );
-    setSelectedMajors(prev =>
-      isRemoving ? prev.filter((m) => m !== major) : [...prev, major]
-    );
+    const newMajors = isRemoving 
+      ? selectedMajors.filter((m) => m !== major)
+      : [...selectedMajors, major];
+    
+    setSelectedMajors(newMajors);
+    
+    try {
+      await updateProgress({ majors: newMajors });
+      showToast(
+        isRemoving ? `Removed ${major} from majors` : `Added ${major} to majors`,
+        isRemoving ? 'remove' : 'add'
+      );
+    } catch (error) {
+      // Revert the change if update failed
+      setSelectedMajors(selectedMajors);
+      showToast('Failed to update majors', 'remove');
+    }
   };
 
-  const handleMinorSelect = (minor: string) => {
+  const handleMinorSelect = async (minor: string) => {
     const isRemoving = selectedMinors.includes(minor);
-    showToast(
-      isRemoving ? `Removed ${minor} from minors` : `Added ${minor} to minors`,
-      isRemoving ? 'remove' : 'add'
-    );
-    setSelectedMinors(prev =>
-      isRemoving ? prev.filter((m) => m !== minor) : [...prev, minor]
-    );
+    const newMinors = isRemoving 
+      ? selectedMinors.filter((m) => m !== minor)
+      : [...selectedMinors, minor];
+    
+    setSelectedMinors(newMinors);
+    
+    try {
+      await updateProgress({ minors: newMinors });
+      showToast(
+        isRemoving ? `Removed ${minor} from minors` : `Added ${minor} to minors`,
+        isRemoving ? 'remove' : 'add'
+      );
+    } catch (error) {
+      // Revert the change if update failed
+      setSelectedMinors(selectedMinors);
+      showToast('Failed to update minors', 'remove');
+    }
   };
 
   const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -186,8 +229,55 @@ export default function Dashboard() {
     });
   };
 
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-gray-900 to-purple-950">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-400 mx-auto mb-4"></div>
+          <p className="text-purple-200">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-gray-900 to-purple-950">
+        <div className="text-center">
+          <div className="bg-red-500/20 border border-red-400/30 rounded-lg p-6 max-w-md">
+            <h3 className="text-xl font-semibold text-red-400 mb-4">Error</h3>
+            <p className="text-gray-200 mb-6">{error}</p>
+            <button
+              onClick={clearError}
+              className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col items-center py-10 px-4">
+      {/* User Info and Logout */}
+      {currentUser && (
+        <div className="absolute top-4 right-4 flex items-center gap-4">
+          <span className="text-purple-300 text-sm">
+            Welcome, {currentUser.firstName || currentUser.email}
+          </span>
+          <button
+            onClick={logout}
+            className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors text-sm"
+          >
+            Logout
+          </button>
+        </div>
+      )}
+      
       {showPopup && (
         <Popup
           message="That combination is not possible."

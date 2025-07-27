@@ -1,9 +1,11 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useEffect, useRef } from 'react';
+import { UserProvider } from './contexts/UserContext';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
 import Courses from './pages/Courses';
+import ProtectedRoute from './ProtectedRoute';
 
 function App() {
   const blobContainerRef = useRef<HTMLDivElement>(null);
@@ -27,23 +29,23 @@ function App() {
   }, []);
 
   return (
-    <>
-      <div className="blob-container" ref={blobContainerRef}>
-        <div className="blob"></div>
-        <div className="blob"></div>
-        <div className="blob"></div>
-        <div className="blob"></div>
-      </div>
-      <Router>
+    <Router>
+      <UserProvider>
+        <div className="blob-container" ref={blobContainerRef}>
+          <div className="blob"></div>
+          <div className="blob"></div>
+          <div className="blob"></div>
+          <div className="blob"></div>
+        </div>
         <Routes>
-          <Route path="/" element={<Dashboard />} />
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/courses" element={<Courses />} />
+          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/courses" element={<ProtectedRoute><Courses /></ProtectedRoute>} />
         </Routes>
-      </Router>
-    </>
+      </UserProvider>
+    </Router>
   );
 }
 

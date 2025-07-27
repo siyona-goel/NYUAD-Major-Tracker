@@ -1,8 +1,9 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 import { courses } from "../data";
+import { useUser } from "../contexts/UserContext";
 
 const MANDATORY_REQUIREMENTS = [
   { id: "fyws", label: "First Year Writing Seminar (FYWS)" },
@@ -69,6 +70,23 @@ export default function Courses() {
   const location = useLocation();
   const navigate = useNavigate();
   const { majors = [], minors = [] } = location.state || {};
+  
+  // Add error handling for user context
+  let userContext;
+  try {
+    userContext = useUser();
+  } catch (error) {
+    console.error('User context error:', error);
+    // Fallback to basic functionality without user context
+    userContext = {
+      currentUser: null,
+      userProgress: null,
+      updateProgress: () => {},
+      saveProgress: () => {}
+    };
+  }
+  
+  const { currentUser, userProgress, updateProgress, saveProgress } = userContext;
 
   // State for checkboxes
   const [mandatory, setMandatory] = useState<SectionState>({});
@@ -82,6 +100,55 @@ export default function Courses() {
   const [minor2Electives, setMinor2Electives] = useState<SectionState>({});
   const [capstone, setCapstone] = useState<SectionState>({});
   const [generalElectives, setGeneralElectives] = useState<number>(0);
+
+  // Restore progress on mount
+  useEffect(() => {
+    if (userProgress) {
+      setMandatory(userProgress.mandatory || {});
+      setMajorReqs(userProgress.majorReqs || {});
+      setMinorReqs(userProgress.minorReqs || {});
+      setMajorElectives(userProgress.majorElectives || {});
+      setMinorElectives(userProgress.minorElectives || {});
+      setMajor2Reqs(userProgress.major2Reqs || {});
+      setMinor2Reqs(userProgress.minor2Reqs || {});
+      setMajor2Electives(userProgress.major2Electives || {});
+      setMinor2Electives(userProgress.minor2Electives || {});
+      setCapstone(userProgress.capstone || {});
+      setGeneralElectives(userProgress.generalElectives || 0);
+    }
+  }, [userProgress]);
+
+  // Debug logging
+  console.log('Courses component rendered with:', {
+    currentUser,
+    hasUserProgress: !!userProgress,
+    mandatoryCount: Object.keys(mandatory).length,
+    majorReqsCount: Object.keys(majorReqs).length
+  });
+
+  // Save progress on any change (with debouncing to prevent too many saves)
+  useEffect(() => {
+    if (currentUser) {
+      const timeoutId = setTimeout(() => {
+        updateProgress({
+          mandatory,
+          majorReqs,
+          minorReqs,
+          majorElectives,
+          minorElectives,
+          major2Reqs,
+          minor2Reqs,
+          major2Electives,
+          minor2Electives,
+          capstone,
+          generalElectives,
+        });
+        saveProgress();
+      }, 500); // Debounce for 500ms
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [mandatory, majorReqs, minorReqs, majorElectives, minorElectives, major2Reqs, minor2Reqs, major2Electives, minor2Electives, capstone, generalElectives, currentUser, updateProgress, saveProgress]);
 
   // Filter courses for selected major/minor
   const major = majors[0] || null;
@@ -194,7 +261,10 @@ export default function Courses() {
       }
     }
     if (prerequisite && !section[prerequisite]) return;
-    setSection((prev: SectionState) => ({ ...prev, [id]: !prev[id] }));
+    setSection((prev: SectionState) => {
+      const updated = { ...prev, [id]: !prev[id] };
+      return updated;
+    });
   }
 
   // Update renderCheckboxes to accept a shouldDisable function
@@ -229,7 +299,7 @@ export default function Courses() {
             {getHeading(majors, minors)}
           </h1>
           <button
-            onClick={() => navigate("/")}
+            onClick={() => navigate("/dashboard")}
             className="absolute right-8 top-8 flex items-center gap-2 px-4 py-2 rounded-lg bg-purple-500/10 border border-purple-400/30 hover:bg-purple-500/20 hover:border-purple-400/50 transition-all duration-300 group"
           >
             <svg className="w-5 h-5 text-purple-400 transform transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
