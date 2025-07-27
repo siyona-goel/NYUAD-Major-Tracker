@@ -181,3 +181,7 @@ NYUAD-Major-Tracker/
 - MongoDB database storage
 - Real-time synchronization
 - Cross-device data access
+
+## ⚠️ Important Limitation
+
+The project does not currently contain the full inventory of courses provided at NYU Abu Dhabi, so many majors will appear empty on selection. 
