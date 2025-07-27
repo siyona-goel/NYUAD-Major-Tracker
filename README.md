@@ -1,6 +1,6 @@
-# NYUAD Major Tracker
+# 🎓 NYUAD Major Tracker
 
-A comprehensive web application for NYU Abu Dhabi students to track their academic progress, manage major/minor selections, and monitor degree completion.
+A comprehensive web application for NYU Abu Dhabi students to track their academic progress, manage major/minor selections, and monitor their degree completion.
 
 ## 🚀 Features
 
@@ -21,16 +21,17 @@ A comprehensive web application for NYU Abu Dhabi students to track their academ
 
 ### Core Functionality
 - **User Registration & Login** with secure authentication
-- **Major/Minor Selection** with validation rules
+- **Major/Minor Selection** with validation rules (according to the university)
 - **Course Progress Tracking** with completion status
 - **Degree Completion Calculator** with percentage tracking
 - **Data Persistence** across sessions and devices
 - **Real-time Updates** with immediate feedback
+- **Cute-milestone Messages** to make you feel good :)
 
 ## 🛠️ Tech Stack
 
 ### Frontend
-- **React 19** with TypeScript
+- **React** with TypeScript
 - **Vite** for fast development and building
 - **Tailwind CSS** for styling
 - **React Router** for navigation
@@ -56,7 +57,7 @@ A comprehensive web application for NYU Abu Dhabi students to track their academ
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
+   git clone <https://github.com/siyonaaa/NYUAD-Major-Tracker.git>
    cd NYUAD-Major-Tracker
    ```
 
@@ -180,45 +181,3 @@ NYUAD-Major-Tracker/
 - MongoDB database storage
 - Real-time synchronization
 - Cross-device data access
-
-## 🚀 Deployment
-
-### Backend Deployment
-1. Set production environment variables
-2. Install production dependencies
-3. Start the server with `npm start`
-
-### Frontend Deployment
-1. Build the application: `npm run build`
-2. Deploy the `dist` folder to your hosting service
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🆘 Support
-
-For support and questions:
-1. Check the [SETUP.md](SETUP.md) guide
-2. Review the API documentation
-3. Check browser console and server logs
-4. Create an issue with detailed information
-
-## 🙏 Acknowledgments
-
-- NYU Abu Dhabi for academic requirements
-- React and Node.js communities
-- MongoDB for database technology
-- All contributors and testers
-
----
-
-**Built with ❤️ for NYU Abu Dhabi students**
