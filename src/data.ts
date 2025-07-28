@@ -356,18 +356,7 @@ export const courses = [
     'maj elec': false,
     'min elec': false,
     prerequisites: null
-  },
-  {
-    name: 'Interaction Design Studio',
-    credits: 4,
-    major: 'Interactive Media',
-    minor: 'Interactive Media',
-    'major req': false,
-    'minor req': false,
-    'maj elec': true,
-    'min elec': true,
-    prerequisites: null
-  },
+  },  
   {
     name: 'Communications Lab',
     credits: 4,
@@ -380,7 +369,29 @@ export const courses = [
     prerequisites: null
   },
   {
-    name: 'Application Development',
+    name: 'Communication and Technology',
+    credits: 4,
+    major: 'Interactive Media',
+    minor: 'Interactive Media',
+    'major req': true,
+    'minor req': false,
+    'maj elec': false,
+    'min elec': false,
+    prerequisites: null
+  },
+  {
+    name: 'Understanding Interactive Media - Critical Questions & Theories',
+    credits: 4,
+    major: 'Interactive Media',
+    minor: 'Interactive Media',
+    'major req': true,
+    'minor req': false,
+    'maj elec': false,
+    'min elec': false,
+    prerequisites: null
+  },
+  {
+    name: 'Circuit Breakers!',
     credits: 4,
     major: 'Interactive Media',
     minor: 'Interactive Media',
@@ -391,7 +402,7 @@ export const courses = [
     prerequisites: null
   },
   {
-    name: 'Digital Sound Design',
+    name: 'Introduction to Digital Humanities',
     credits: 4,
     major: 'Interactive Media',
     minor: 'Interactive Media',
@@ -400,6 +411,116 @@ export const courses = [
     'maj elec': true,
     'min elec': true,
     prerequisites: null
+  },
+  {
+    name: 'Machine Lab',
+    credits: 4,
+    major: 'Interactive Media',
+    minor: 'Interactive Media',
+    'major req': false,
+    'minor req': false,
+    'maj elec': true,
+    'min elec': true,
+    prerequisites: null
+  },
+  {
+    name: 'Software Art: Image',
+    credits: 4,
+    major: 'Interactive Media',
+    minor: 'Interactive Media',
+    'major req': false,
+    'minor req': false,
+    'maj elec': true,
+    'min elec': true,
+    prerequisites: ['Introduction to Interactive Media', 'Decoding Nature']
+  },
+  {
+    name: 'Software Art: Text',
+    credits: 4,
+    major: 'Interactive Media',
+    minor: 'Interactive Media',
+    'major req': false,
+    'minor req': false,
+    'maj elec': true,
+    'min elec': true,
+    prerequisites: ['Introduction to Interactive Media']
+  },
+  {
+    name: 'Decoding Nature',
+    credits: 4,
+    major: 'Interactive Media',
+    minor: 'Interactive Media',
+    'major req': false,
+    'minor req': false,
+    'maj elec': true,
+    'min elec': true,
+    prerequisites: ['Introduction to Interactive Media']
+  },
+  {
+    name: 'Games and Play',
+    credits: 4,
+    major: 'Interactive Media',
+    minor: 'Interactive Media',
+    'major req': false,
+    'minor req': false,
+    'maj elec': true,
+    'min elec': true,
+    prerequisites: ['Introduction to Interactive Media']
+  },
+  {
+    name: 'Live Coding',
+    credits: 4,
+    major: 'Interactive Media',
+    minor: 'Interactive Media',
+    'major req': false,
+    'minor req': false,
+    'maj elec': true,
+    'min elec': true,
+    prerequisites: ['Introduction to Interactive Media']
+  },
+  {
+    name: 'Connections Lab',
+    credits: 4,
+    major: 'Interactive Media',
+    minor: 'Interactive Media',
+    'major req': false,
+    'minor req': false,
+    'maj elec': true,
+    'min elec': true,
+    prerequisites: ['Introduction to Interactive Media']
+  },
+  {
+    name: 'Future Punk',
+    credits: 4,
+    major: 'Interactive Media',
+    minor: 'Interactive Media',
+    'major req': false,
+    'minor req': false,
+    'maj elec': true,
+    'min elec': true,
+    prerequisites: null
+  },
+  {
+    name: 'Bioart Practices',
+    credits: 4,
+    major: 'Interactive Media',
+    minor: 'Interactive Media',
+    'major req': false,
+    'minor req': false,
+    'maj elec': true,
+    'min elec': true,
+    prerequisites: null
+  },
+  {
+    name: 'Designing Virtual Worlds',
+    credits: 4,
+    major: 'Interactive Media',
+    minor: 'Interactive Media',
+    'major req': false,
+    'minor req': false,
+    'maj elec': true,
+    'min elec': true,
+    prerequisites: ['Introduction to Interactive Media', 'Communications Lab', 'Decoding Nature']
   },
   {
     name: 'Desert Media Art',
@@ -408,9 +529,9 @@ export const courses = [
     minor: 'Interactive Media',
     'major req': false,
     'minor req': false,
-    'maj elec': false,
+    'maj elec': true,
     'min elec': true,
-    prerequisites: null
+    prerequisites: ['Introduction to Interactive Media']
   },
 
 

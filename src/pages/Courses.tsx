@@ -86,7 +86,7 @@ export default function Courses() {
     };
   }
   
-  const { currentUser, userProgress, updateProgress, saveProgress } = userContext;
+  const { currentUser, userProgress, updateProgress } = userContext;
 
   // State for checkboxes
   const [mandatory, setMandatory] = useState<SectionState>({});
@@ -143,12 +143,11 @@ export default function Courses() {
           capstone,
           generalElectives,
         });
-        saveProgress();
       }, 500); // Debounce for 500ms
       
       return () => clearTimeout(timeoutId);
     }
-  }, [mandatory, majorReqs, minorReqs, majorElectives, minorElectives, major2Reqs, minor2Reqs, major2Electives, minor2Electives, capstone, generalElectives, currentUser, updateProgress, saveProgress]);
+  }, [mandatory, majorReqs, minorReqs, majorElectives, minorElectives, major2Reqs, minor2Reqs, major2Electives, minor2Electives, capstone, generalElectives, currentUser, updateProgress]);
 
   // Filter courses for selected major/minor
   const major = majors[0] || null;
@@ -159,10 +158,22 @@ export default function Courses() {
   const minorReqCourses = courses.filter(c => c.minor === minor && c['minor req']);
   const minorElecCourses = courses.filter(c => c.minor === minor && c['min elec']);
 
+  // Second major and minor courses (if they exist)
+  const major2 = majors[1] || null;
+  const minor2 = minors[1] || null;
+  const major2ReqCourses = courses.filter(c => c.major === major2 && c['major req']);
+  const major2ElecCourses = courses.filter(c => c.major === major2 && c['maj elec']);
+  const minor2ReqCourses = courses.filter(c => c.minor === minor2 && c['minor req']);
+  const minor2ElecCourses = courses.filter(c => c.minor === minor2 && c['min elec']);
+
   const majorReqItems = majorReqCourses.map(courseToCheckboxItem);
   const majorElecItems = majorElecCourses.map(courseToCheckboxItem);
   const minorReqItems = minorReqCourses.map(courseToCheckboxItem);
   const minorElecItems = minorElecCourses.map(courseToCheckboxItem);
+  const major2ReqItems = major2ReqCourses.map(courseToCheckboxItem);
+  const major2ElecItems = major2ElecCourses.map(courseToCheckboxItem);
+  const minor2ReqItems = minor2ReqCourses.map(courseToCheckboxItem);
+  const minor2ElecItems = minor2ElecCourses.map(courseToCheckboxItem);
 
   // Gather all checked course IDs
   const checkedCourseIds = useMemo(() => [
@@ -215,18 +226,14 @@ export default function Courses() {
   // Milestone message
   const milestone = MILESTONES.slice().reverse().find(m => percentComplete >= m.percent);
 
-  // Elective selection logic (max 2 total)
-  const totalElectivesSelected = [
-    ...Object.values(majorElectives),
-    ...Object.values(minorElectives),
-    ...Object.values(major2Electives),
-    ...Object.values(minor2Electives),
-  ].filter(Boolean).length;
-  const electivesDisabled = totalElectivesSelected >= 2;
+  // Elective selection logic (max 2 per category)
+  const majorElectivesSelected = Object.values(majorElectives).filter(Boolean).length;
+  const minorElectivesSelected = Object.values(minorElectives).filter(Boolean).length;
+  // Note: major2Electives and minor2Electives are not rendered in the UI, so we don't count them
+  const major2ElectivesSelected = Object.values(major2Electives).filter(Boolean).length;
+  const minor2ElectivesSelected = Object.values(minor2Electives).filter(Boolean).length;
 
-  // Count checked electives for each group
-  const majorElectivesChecked = Object.values(majorElectives).filter(Boolean).length;
-  const minorElectivesChecked = Object.values(minorElectives).filter(Boolean).length;
+
 
   // Checkbox handler with prerequisite logic
   function handleCheck(section: SectionState, setSection: SetSection, id: string, prerequisite?: string) {
@@ -352,34 +359,89 @@ export default function Courses() {
           </div>
         </div>
         {/* Major/Minor/Double Major Requirements */}
-        <div className="flex flex-col md:flex-row gap-8 mb-8">
-          <div className="flex-1 bg-gray-900/70 border border-purple-400/30 rounded-lg p-6">
-            <h3 className="text-xl font-bold text-purple-200 mb-4 text-center">Major Requirements</h3>
-            {renderCheckboxes(majorReqItems, majorReqs, setMajorReqs)}
-            <div className="mt-6">
-              <h4 className="font-semibold text-purple-300 mb-2">Major Electives</h4>
-              {renderCheckboxes(
-                majorElecItems,
-                majorElectives,
-                setMajorElectives,
-                (item) => !majorElectives[item.id] && majorElectivesChecked >= 2
-              )}
+        {majors.length === 2 && minors.length === 0 ? (
+          // Show two major requirement boxes side by side for double major
+          <div className="flex flex-col md:flex-row gap-8 mb-8">
+            <div className="flex-1 bg-gray-900/70 border border-purple-400/30 rounded-lg p-6">
+              <h3 className="text-xl font-bold text-purple-200 mb-4 text-center">{majors[0]} Requirements</h3>
+              {renderCheckboxes(majorReqItems, majorReqs, setMajorReqs)}
+              <div className="mt-6">
+                <h4 className="font-semibold text-purple-300 mb-2">{majors[0]} Electives <span className="text-purple-400/70 text-sm">(Choose 2)</span></h4>
+                {renderCheckboxes(
+                  majorElecItems,
+                  majorElectives,
+                  setMajorElectives,
+                  (item) => !majorElectives[item.id] && majorElectivesSelected >= 2
+                )}
+              </div>
+            </div>
+            <div className="flex-1 bg-gray-900/70 border border-purple-400/30 rounded-lg p-6">
+              <h3 className="text-xl font-bold text-purple-200 mb-4 text-center">{majors[1]} Requirements</h3>
+              {renderCheckboxes(major2ReqItems, major2Reqs, setMajor2Reqs)}
+              <div className="mt-6">
+                <h4 className="font-semibold text-purple-300 mb-2">{majors[1]} Electives <span className="text-purple-400/70 text-sm">(Choose 2)</span></h4>
+                {renderCheckboxes(
+                  major2ElecItems,
+                  major2Electives,
+                  setMajor2Electives,
+                  (item) => !major2Electives[item.id] && major2ElectivesSelected >= 2
+                )}
+              </div>
             </div>
           </div>
-          <div className="flex-1 bg-gray-900/70 border border-purple-400/30 rounded-lg p-6">
-            <h3 className="text-xl font-bold text-purple-200 mb-4 text-center">Minor Requirements</h3>
-            {renderCheckboxes(minorReqItems, minorReqs, setMinorReqs)}
-            <div className="mt-6">
-              <h4 className="font-semibold text-purple-300 mb-2">Minor Electives</h4>
-              {renderCheckboxes(
-                minorElecItems,
-                minorElectives,
-                setMinorElectives,
-                (item) => !minorElectives[item.id] && minorElectivesChecked >= 2
-              )}
+        ) : (
+          // Show major and minor requirements side by side for other combinations
+          <div className="flex flex-col md:flex-row gap-8 mb-8">
+            <div className="flex-1 bg-gray-900/70 border border-purple-400/30 rounded-lg p-6">
+              <h3 className="text-xl font-bold text-purple-200 mb-4 text-center">Major Requirements</h3>
+              {renderCheckboxes(majorReqItems, majorReqs, setMajorReqs)}
+              <div className="mt-6">
+                <h4 className="font-semibold text-purple-300 mb-2">Major Electives <span className="text-purple-400/70 text-sm">(Choose 2)</span></h4>
+                {renderCheckboxes(
+                  majorElecItems,
+                  majorElectives,
+                  setMajorElectives,
+                  (item) => !majorElectives[item.id] && majorElectivesSelected >= 2
+                )}
+              </div>
+            </div>
+            <div className="flex-1 bg-gray-900/70 border border-purple-400/30 rounded-lg p-6">
+              <h3 className="text-xl font-bold text-purple-200 mb-4 text-center">Minor Requirements</h3>
+              {renderCheckboxes(minorReqItems, minorReqs, setMinorReqs)}
+              <div className="mt-6">
+                <h4 className="font-semibold text-purple-300 mb-2">Minor Electives <span className="text-purple-400/70 text-sm">(Choose 2)</span></h4>
+                {renderCheckboxes(
+                  minorElecItems,
+                  minorElectives,
+                  setMinorElectives,
+                  (item) => !minorElectives[item.id] && minorElectivesSelected >= 2
+                )}
+              </div>
             </div>
           </div>
-        </div>
+        )}
+        
+
+        
+        {/* Second Minor Requirements (if double minor and not double major) */}
+        {minors.length > 1 && majors.length !== 2 && (
+          <div className="flex flex-col md:flex-row gap-8 mb-8">
+            <div className="flex-1 bg-gray-900/70 border border-purple-400/30 rounded-lg p-6">
+              <h3 className="text-xl font-bold text-purple-200 mb-4 text-center">Second Minor Requirements</h3>
+              {renderCheckboxes(minor2ReqItems, minor2Reqs, setMinor2Reqs)}
+              <div className="mt-6">
+                <h4 className="font-semibold text-purple-300 mb-2">Second Minor Electives <span className="text-purple-400/70 text-sm">(Choose 2)</span></h4>
+                {renderCheckboxes(
+                  minor2ElecItems,
+                  minor2Electives,
+                  setMinor2Electives,
+                  (item) => !minor2Electives[item.id] && minor2ElectivesSelected >= 2
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+        
         {/* General Electives Section */}
         <div className="bg-gray-900/70 border border-purple-400/30 rounded-lg p-6 mb-8">
           <h2 className="text-2xl font-bold text-purple-300 mb-4 text-center">General Electives</h2>
