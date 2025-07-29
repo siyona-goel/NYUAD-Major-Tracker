@@ -185,3 +185,15 @@ NYUAD-Major-Tracker/
 ## ⚠️ Important Limitation
 
 The project does not currently contain the full inventory of courses provided at NYU Abu Dhabi, so many majors will appear empty on selection. 
+
+## ✨ End Product
+
+![Alt text](images/1.png)
+
+![Alt text](images/2.png)
+
+![Alt text](images/3.png)
+
+![Alt text](images/4.1.png)
+
+![Alt text](images/5.png)
