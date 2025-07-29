@@ -38,23 +38,23 @@ const sampleProgress = [
       'Math': true
     },
     majorReqs: {
-      'Introduction to Computer Science': true,
-      'Calculus w/ Applications to Science & Engr': true,
-      'Discrete Mathematics': true,
-      'Data Structures': false,
-      'Computer Systems Organization': false
+      'computer-science--introduction-to-computer-science': true,
+      'computer-science--calculus-w/-applications-to-science-&-engr': true,
+      'computer-science--discrete-mathematics': true,
+      'computer-science--data-structures': false,
+      'computer-science--computer-systems-organization': false
     },
     minorReqs: {
-      'Introduction to Interactive Media': true,
-      'Communications Lab': false
+      'interactive-media--introduction-to-interactive-media': true,
+      'interactive-media--communications-lab': false
     },
     majorElectives: {
-      'Database Systems': true,
-      'Machine Learning': false
+      'computer-science--database-systems': false,
+      'computer-science--machine-learning': false
     },
     minorElectives: {
-      'Interaction Design Studio': true,
-      'Application Development': false
+      'interactive-media--interaction-design-studio': false,
+      'interactive-media--application-development': false
     },
     generalElectives: 8,
     totalCreditsEarned: 32,
