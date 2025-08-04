@@ -117,21 +117,6 @@ Creates test users:
 - student2@nyu.edu / Password123
 - student3@nyu.edu / Password123
 
-## 📚 API Documentation
-
-### Authentication Endpoints
-- `POST /api/auth/register` - Register new user
-- `POST /api/auth/login` - Login user
-- `GET /api/auth/me` - Get current user
-
-### Progress Endpoints
-- `GET /api/progress` - Get user progress
-- `PUT /api/progress` - Update user progress
-- `PATCH /api/progress/course` - Update course completion
-- `DELETE /api/progress` - Reset user progress
-
-### Health Check
-- `GET /api/health` - API status
 
 ## 🏗️ Project Structure
 
