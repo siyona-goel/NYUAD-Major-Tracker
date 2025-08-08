@@ -95,7 +95,7 @@ export const courses = [
     major: 'Computer Science',
     minor: 'Computer Science',
     'major req': true,
-    'minor req': true,
+    'minor req': false,
     'maj elec': false,
     'min elec': false,
     prerequisites: null
@@ -128,7 +128,7 @@ export const courses = [
     major: 'Computer Science',
     minor: 'Computer Science',
     'major req': true,
-    'minor req': true,
+    'minor req': false,
     'maj elec': false,
     'min elec': false,
     prerequisites: ['Data Structures']
@@ -150,7 +150,7 @@ export const courses = [
     major: 'Computer Science',
     minor: 'Computer Science',
     'major req': true,
-    'minor req': true,
+    'minor req': false,
     'maj elec': false,
     'min elec': false,
     prerequisites: ['Algorithms', 'Data Structures']
