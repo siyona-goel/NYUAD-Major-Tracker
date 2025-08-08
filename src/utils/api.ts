@@ -81,6 +81,15 @@ const apiRequest = async <T>(
 
   try {
     const response = await fetch(url, config);
+    
+    // Check if response is JSON
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      // Handle non-JSON responses (like rate limit errors)
+      const text = await response.text();
+      throw new Error(text || 'API request failed');
+    }
+    
     const data = await response.json();
 
     if (!response.ok) {
