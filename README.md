@@ -136,6 +136,7 @@ NYUAD-Major-Tracker/
 │   ├── routes/                   # API routes
 │   └── scripts/                  # Utility scripts
 ├── public/                       # Public assets
+├── images/                       # Images for README
 └── package.json                  # Frontend dependencies
 ```
 
