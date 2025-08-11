@@ -173,10 +173,13 @@ The project does not currently contain the full inventory of courses provided at
 
 ## ✨ End Product
 
+- The Landing page, where you can log into your account
 ![Alt text](images/1.png)
 
+- This where you choose your degree combinations. The allowed combinations are 1 MAJ + 1 MIN, 2 MAJ, or 1 MAJ + 2 MIN
 ![Alt text](images/2.png)
 
+- An example of how choosing a major in Comp Sci with a minor in Interactive Media would look
 ![Alt text](images/3.png)
 
 ![Alt text](images/4.1.png)
