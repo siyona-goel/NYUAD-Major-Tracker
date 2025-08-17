@@ -77,7 +77,7 @@ export interface Course {
 }
 
 export const courses = [
-  // Computer Science Major Courses
+  // Computer Science
   {
     name: 'Introduction to Computer Science',
     credits: 4,
@@ -288,34 +288,34 @@ export const courses = [
     prerequisites: null
   },
 
-  
+  // Economics
   {
     name: 'Principles of Microeconomics',
     credits: 4,
     major: 'Economics',
-    minor: null,
+    minor: 'Economics',
     'major req': true,
-    'minor req': false,
+    'minor req': true,
     'maj elec': false,
-    'min elec': false,
+    'min elec': true,
     prerequisites: null
   },
   {
     name: 'Principles of Macroeconomics',
     credits: 4,
     major: 'Economics',
-    minor: null,
+    minor: 'Economics',
     'major req': true,
-    'minor req': false,
+    'minor req': true,
     'maj elec': false,
-    'min elec': false,
+    'min elec': true,
     prerequisites: null
   },
   {
     name: 'Intermediate Microeconomics',
     credits: 4,
     major: 'Economics',
-    minor: null,
+    minor: 'Economics',
     'major req': true,
     'minor req': false,
     'maj elec': false,
@@ -326,7 +326,7 @@ export const courses = [
     name: 'Intermediate Macroeconomics',
     credits: 4,
     major: 'Economics',
-    minor: null,
+    minor: 'Economics',
     'major req': true,
     'minor req': false,
     'maj elec': false,
@@ -337,15 +337,15 @@ export const courses = [
     name: 'Econometrics',
     credits: 4,
     major: 'Economics',
-    minor: null,
-    'major req': true,
+    minor: 'Economics',
+    'major req': false,
     'minor req': false,
-    'maj elec': false,
-    'min elec': false,
+    'maj elec': true,
+    'min elec': true,
     prerequisites: null
   },  
 
-
+// Interactive Media
   {
     name: 'Introduction to Interactive Media',
     credits: 4,
@@ -534,13 +534,13 @@ export const courses = [
     prerequisites: ['Introduction to Interactive Media']
   },
 
-
+// Psychology
   {
     name: 'Introduction to Psychology',
     credits: 4,
     major: 'Psychology',
     minor: 'Psychology',
-    'major req': false,
+    'major req': true,
     'minor req': true,
     'maj elec': false,
     'min elec': false,
@@ -551,32 +551,65 @@ export const courses = [
     credits: 4,
     major: null,
     minor: 'Psychology',
-    'major req': false,
-    'minor req': true,
+    'major req': true,
+    'minor req': false,
     'maj elec': false,
-    'min elec': false,
+    'min elec': true,
     prerequisites: null
   },
   {
-    name: 'Cognitive Psychology',
+    name: 'Biopsychology',
     credits: 4,
     major: 'Psychology',
     minor: 'Psychology',
     'major req': true,
     'minor req': false,
     'maj elec': false,
-    'min elec': false,
+    'min elec': true,
     prerequisites: null
   },
   {
-    name: 'Social Psychology',
+    name: 'Statistics for Psychology',
     credits: 4,
-    major: null,
+    major: 'Psychology',
+    minor: 'Psychology',
+    'major req': true,
+    'minor req': false,
+    'maj elec': false,
+    'min elec': true,
+    prerequisites: null
+  }
+  {
+    name: 'Developmental Psychology',
+    credits: 4,
+    major: 'Psychology',
     minor: 'Psychology',
     'major req': false,
     'minor req': false,
+    'maj elec': true,
+    'min elec': true,
+    prerequisites: ['Introduction to Psychology']
+  }
+  {
+    name: 'Social Psychology',
+    credits: 4,
+    major: 'Psychology',
+    minor: 'Psychology',
+    'major req': false,
+    'minor req': false,
+    'maj elec': true,
+    'min elec': true,
+    prerequisites: ['Introduction to Psychology']
+  }
+  {
+    name: 'Research Seminar in Psychology',
+    credits: 2,
+    major: 'Psychology',
+    minor: 'Psychology',
+    'major req': true,
+    'minor req': false,
     'maj elec': false,
     'min elec': false,
-    prerequisites: null
+    prerequisites: ['Introduction to Psychology', 'Research Methods in Psychology']
   }
 ]; 
